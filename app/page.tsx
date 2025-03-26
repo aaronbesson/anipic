@@ -5,12 +5,15 @@ import { useAuth } from "@/components/auth-provider"
 import { GoogleAuthButton } from "@/components/google-auth-button"
 import { VideoGenerator } from "@/components/video-generator"
 import { VideoPlayer } from "@/components/video-player"
+import { StripePaymentForm } from "@/components/stripe-payment-form"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Loader2 } from "lucide-react"
+import { Loader2, CreditCard } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 export default function Home() {
-  const { user, loading } = useAuth()
+  const { user, userData, loading } = useAuth()
   const [videoUrl, setVideoUrl] = useState<string | null>(null)
+  const [showPayment, setShowPayment] = useState(false)
 
   return (
     <main className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -46,10 +49,27 @@ export default function Home() {
                   <span>Welcome, {user.displayName}</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <GoogleAuthButton />
+              <CardContent className="flex justify-between items-center">
+                <div>
+                  <p className="text-sm">
+                    Credits: <span className="font-semibold">{userData?.credits || 0}</span>
+                  </p>
+                </div>
+                <Button 
+                  size="sm"
+                  onClick={() => setShowPayment(!showPayment)}
+                  variant="outline"
+                  className="flex items-center gap-1"
+                >
+                  <CreditCard className="h-4 w-4" />
+                  {showPayment ? "Hide Payment" : "Buy Credits"}
+                </Button>
               </CardContent>
             </Card>
+
+            {showPayment && (
+              <StripePaymentForm />
+            )}
 
             {videoUrl ? (
               <div className="space-y-4">

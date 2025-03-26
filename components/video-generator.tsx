@@ -10,13 +10,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2 } from "lucide-react"
 import { ImageUploader } from "./image-uploader"
 import { useAuth } from "./auth-provider"
+import { useCredits } from "@/lib/userService"
 
 type VideoGeneratorProps = {
   onVideoGenerated: (videoUrl: string) => void
 }
 
 export function VideoGenerator({ onVideoGenerated }: VideoGeneratorProps) {
-  const { user } = useAuth()
+  const { user, userData, refreshUserData } = useAuth()
   const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [prompt, setPrompt] = useState("")
   const [duration, setDuration] = useState("5")
@@ -97,10 +98,26 @@ export function VideoGenerator({ onVideoGenerated }: VideoGeneratorProps) {
       return
     }
 
+    if (!user) {
+      setError("You must be logged in to generate videos")
+      return
+    }
+
+    if (!userData || userData.credits <= 0) {
+      setError("You don't have enough credits. Please purchase credits to continue.")
+      return
+    }
+
     try {
       setError(null)
       setIsGenerating(true)
-      setStatus("starting");
+      setStatus("starting")
+
+      // Use 1 credit for the video generation
+      const creditUsed = await useCredits(user.uid, 1)
+      if (!creditUsed) {
+        throw new Error("Failed to use credits")
+      }
 
       const response = await fetch("/api/generate-video", {
         method: "POST",
@@ -113,6 +130,7 @@ export function VideoGenerator({ onVideoGenerated }: VideoGeneratorProps) {
           duration: Number.parseInt(duration),
           aspect_ratio: aspectRatio,
           start_image_url: imageUrl,
+          userId: user.uid,
         }),
       })
 
@@ -122,6 +140,9 @@ export function VideoGenerator({ onVideoGenerated }: VideoGeneratorProps) {
 
       const data = await response.json()
       setPredictionId(data.id)
+      
+      // Refresh user data to update credit display
+      await refreshUserData()
     } catch (error) {
       console.error("Error generating video:", error)
       setError("Failed to generate video. Please try again.")
@@ -153,9 +174,16 @@ export function VideoGenerator({ onVideoGenerated }: VideoGeneratorProps) {
   return (
     <Card className="w-full">
       <CardContent className="pt-6 space-y-6">
+        <div className="flex justify-between items-center">
+          <h3 className="font-medium">Generate Video</h3>
+          <div className="text-sm">
+            Credits: <span className="font-semibold">{userData?.credits || 0}</span>
+          </div>
+        </div>
+        
         <div className="space-y-2">
           <Label htmlFor="image">Upload Image</Label>
-          <ImageUploader onImageUploaded={setImageUrl} />
+          <ImageUploader onImageUploaded={setImageUrl} isGenerating={isGenerating} />
         </div>
 
         <div className="space-y-2">
@@ -179,6 +207,7 @@ export function VideoGenerator({ onVideoGenerated }: VideoGeneratorProps) {
               max="10"
               value={duration}
               onChange={(e) => setDuration(e.target.value)}
+              disabled={true}
             />
           </div>
 
@@ -212,14 +241,20 @@ export function VideoGenerator({ onVideoGenerated }: VideoGeneratorProps) {
 
         {error && <p className="text-sm text-red-500">{error}</p>}
 
-        <Button onClick={handleGenerate} disabled={isGenerating || !imageUrl || !prompt} className="w-full">
+        <Button 
+          onClick={handleGenerate} 
+          disabled={isGenerating || !imageUrl || !prompt || !userData || userData.credits <= 0} 
+          className="w-full"
+        >
           {isGenerating ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               {getStatusMessage()}
             </>
+          ) : userData && userData.credits <= 0 ? (
+            "No Credits Available"
           ) : (
-            "Generate Video"
+            "Generate Video (1 Credit)"
           )}
         </Button>
       </CardContent>

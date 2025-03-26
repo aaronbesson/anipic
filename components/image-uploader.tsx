@@ -9,10 +9,11 @@ import { Card } from "@/components/ui/card"
 import { Loader2, Upload } from "lucide-react"
 
 type ImageUploaderProps = {
-  onImageUploaded: (imageUrl: string) => void
+  onImageUploaded: (imageUrl: string) => void;
+  isGenerating: boolean;
 }
 
-export function ImageUploader({ onImageUploaded }: ImageUploaderProps) {
+export function ImageUploader({ onImageUploaded, isGenerating }: ImageUploaderProps) {
   const { user } = useAuth()
   const [isUploading, setIsUploading] = useState(false)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
@@ -92,7 +93,7 @@ export function ImageUploader({ onImageUploaded }: ImageUploaderProps) {
         </Card>
       )}
 
-      <Button onClick={triggerFileInput} disabled={isUploading} className="w-full">
+      {!isGenerating && <Button onClick={triggerFileInput} disabled={isUploading} className="w-full">
         {isUploading ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -101,7 +102,7 @@ export function ImageUploader({ onImageUploaded }: ImageUploaderProps) {
         ) : (
           "Upload Image"
         )}
-      </Button>
+      </Button>}
     </div>
   )
 }
