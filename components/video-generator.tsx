@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -23,7 +23,73 @@ export function VideoGenerator({ onVideoGenerated }: VideoGeneratorProps) {
   const [aspectRatio, setAspectRatio] = useState("9:16")
   const [loop, setLoop] = useState(true)
   const [isGenerating, setIsGenerating] = useState(false)
+  const [predictionId, setPredictionId] = useState<string | null>(null)
+  const [status, setStatus] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Poll for video status when we have a prediction ID
+  useEffect(() => {
+    if (!predictionId) return;
+    
+    // Clear any existing interval
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current);
+    }
+    
+    const checkStatus = async () => {
+      try {
+        const response = await fetch("/api/check-video-status", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ predictionId }),
+        });
+        
+        if (!response.ok) {
+          throw new Error("Failed to check video status");
+        }
+        
+        const data = await response.json();
+        setStatus(data.status);
+        
+        // If completed, stop polling and set video URL
+        if (data.status === "succeeded") {
+          if (pollingIntervalRef.current) {
+            clearInterval(pollingIntervalRef.current);
+          }
+          setIsGenerating(false);
+          setPredictionId(null);
+          onVideoGenerated(data.output);
+        } 
+        // If failed, stop polling and show error
+        else if (data.status === "failed" || data.status === "canceled") {
+          if (pollingIntervalRef.current) {
+            clearInterval(pollingIntervalRef.current);
+          }
+          setIsGenerating(false);
+          setPredictionId(null);
+          setError("Video generation failed. Please try again.");
+        }
+      } catch (error) {
+        console.error("Error checking status:", error);
+      }
+    };
+    
+    // Immediately check once
+    checkStatus();
+    
+    // Then set up polling every 3 seconds
+    pollingIntervalRef.current = setInterval(checkStatus, 3000);
+    
+    // Clean up interval on unmount
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+      }
+    };
+  }, [predictionId, onVideoGenerated]);
 
   const handleGenerate = async () => {
     if (!imageUrl || !prompt) {
@@ -34,6 +100,7 @@ export function VideoGenerator({ onVideoGenerated }: VideoGeneratorProps) {
     try {
       setError(null)
       setIsGenerating(true)
+      setStatus("starting");
 
       const response = await fetch("/api/generate-video", {
         method: "POST",
@@ -54,14 +121,30 @@ export function VideoGenerator({ onVideoGenerated }: VideoGeneratorProps) {
       }
 
       const data = await response.json()
-      onVideoGenerated(data.output)
+      setPredictionId(data.id)
     } catch (error) {
       console.error("Error generating video:", error)
       setError("Failed to generate video. Please try again.")
-    } finally {
       setIsGenerating(false)
     }
   }
+
+  const getStatusMessage = () => {
+    if (!status) return "Preparing...";
+    
+    switch (status) {
+      case "starting":
+        return "Starting generation...";
+      case "processing":
+        return "Processing your video...";
+      case "succeeded":
+        return "Completed! Loading video...";
+      case "failed":
+        return "Generation failed";
+      default:
+        return `${status.charAt(0).toUpperCase() + status.slice(1)}...`;
+    }
+  };
 
   if (!user) {
     return null
@@ -133,7 +216,7 @@ export function VideoGenerator({ onVideoGenerated }: VideoGeneratorProps) {
           {isGenerating ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Generating Video...
+              {getStatusMessage()}
             </>
           ) : (
             "Generate Video"
