@@ -8,9 +8,9 @@ import { AuthProvider } from "@/components/auth-provider"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Firebase Auth with Replicate",
-  description: "Sign up with Google, upload images, and generate videos with Replicate",
-    generator: 'v0.dev'
+  title: "Studio Anim",
+  description: "Upload an image, and generate a video with AI",
+    generator: 'Aaron Besson'
 }
 
 export default function RootLayout({
