@@ -115,34 +115,6 @@ function CheckoutForm({ onSuccess }: { onSuccess: () => void }) {
   const { refreshUserData } = useAuth()
   const { user } = useAuth()
   const { toast } = useToast()
-  // Function to manually add credits
-  const addCreditsManually = async (userId: string, credits: number) => {
-    try {
-      console.log(`Adding ${credits} credits to user ${userId} manually`);
-      
-      // Update Firestore directly from the client
-      const { initializeFirebase } = await import("@/lib/firebase");
-      const { db } = await initializeFirebase();
-      
-      if (!db) {
-        console.error("Firestore not initialized");
-        return false;
-      }
-      
-      const { doc, updateDoc, increment } = await import("firebase/firestore");
-      const userRef = doc(db, "users", userId);
-      await updateDoc(userRef, {
-        credits: increment(credits),
-        updatedAt: Date.now()
-      });
-      
-      console.log("Credits added successfully");
-      return true;
-    } catch (error) {
-      console.error("Error adding credits:", error);
-      return false;
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -166,21 +138,15 @@ function CheckoutForm({ onSuccess }: { onSuccess: () => void }) {
       if (result.error) {
         setErrorMessage(result.error.message || "Payment failed")
       } else if (result.paymentIntent?.status === "succeeded") {
-        // If payment succeeded, add credits client-side instead of waiting for webhook
-        const success = await addCreditsManually(user.uid, 20);
-        
-        if (success) {
-          onSuccess()
-          refreshUserData()
-          toast({
-            title: "Payment Successful",
-            description: "20 credits have been added to your account.",
-          })
-          setTimeout(() => refreshUserData(), 1000)
-          setTimeout(() => refreshUserData(), 3000)
-        } else {
-          setErrorMessage("Payment succeeded but failed to add credits. Please contact support.")
-        }
+        // Payment succeeded, wait for webhook to add credits
+        onSuccess()
+        toast({
+          title: "Payment Successful",
+          description: "Your credits will be added shortly.",
+        })
+        // Poll for updated user data
+        setTimeout(() => refreshUserData(), 1000)
+        setTimeout(() => refreshUserData(), 3000)
       } else {
         setErrorMessage("Payment not completed. Please try again.")
       }
