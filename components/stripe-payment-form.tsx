@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Loader2 } from "lucide-react"
 import { useAuth } from "./auth-provider"
-
+import { useToast } from "@/hooks/use-toast"
 // Load Stripe outside of component render
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
 
@@ -22,7 +22,7 @@ export function StripePaymentForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [paymentSuccess, setPaymentSuccess] = useState(false)
-
+  const { toast } = useToast()
   // Create payment intent when component mounts
   useEffect(() => {
     if (!user) return
@@ -73,17 +73,6 @@ export function StripePaymentForm() {
             Your credits have been added to your account.
           </CardDescription>
         </CardHeader>
-        <CardFooter>
-          <Button 
-            onClick={() => {
-              refreshUserData()
-              setPaymentSuccess(false)
-            }} 
-            className="w-full"
-          >
-            Continue
-          </Button>
-        </CardFooter>
       </Card>
     )
   }
@@ -125,7 +114,7 @@ function CheckoutForm({ onSuccess }: { onSuccess: () => void }) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const { refreshUserData } = useAuth()
   const { user } = useAuth()
-
+  const { toast } = useToast()
   // Function to manually add credits
   const addCreditsManually = async (userId: string, credits: number) => {
     try {
@@ -181,10 +170,12 @@ function CheckoutForm({ onSuccess }: { onSuccess: () => void }) {
         const success = await addCreditsManually(user.uid, 20);
         
         if (success) {
-          onSuccess() // Show success message
-          refreshUserData() // Refresh user data immediately
-          
-          // Also attempt multiple refreshes to ensure UI updates
+          onSuccess()
+          refreshUserData()
+          toast({
+            title: "Payment Successful",
+            description: "20 credits have been added to your account.",
+          })
           setTimeout(() => refreshUserData(), 1000)
           setTimeout(() => refreshUserData(), 3000)
         } else {

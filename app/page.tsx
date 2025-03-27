@@ -7,8 +7,10 @@ import { VideoGenerator } from "@/components/video-generator"
 import { VideoPlayer } from "@/components/video-player"
 import { StripePaymentForm } from "@/components/stripe-payment-form"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Loader2, CreditCard } from "lucide-react"
+import { Loader2, CreditCard, GithubIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Toaster } from "@/components/ui/toaster"
+import Link from "next/link"
 
 export default function Home() {
   const { user, userData, loading } = useAuth()
@@ -84,6 +86,10 @@ export default function Home() {
           </div>
         )}
       </div>
+      <Link href="https://github.com/aaronbesson/anipic" target="_blank"> 
+        <GithubIcon className="absolute bottom-4 right-4 w-8 h-8 bg-white rounded-full p-1 shadow-md border border-gray-200" />
+      </Link>
+      <Toaster /> 
     </main>
   )
 }
