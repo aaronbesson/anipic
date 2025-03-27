@@ -6,7 +6,7 @@ import { useState, useRef, useEffect } from "react"
 import { useAuth } from "./auth-provider"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Loader2, Paintbrush, Paintbrush2, PaintbrushIcon, SparkleIcon, Upload } from "lucide-react"
+import { Loader2, Paintbrush, Paintbrush2, PaintbrushIcon, SparkleIcon, Upload, VideoIcon, XIcon } from "lucide-react"
 
 type ImageUploaderProps = {
   onImageUploaded: (imageUrl: string) => void;

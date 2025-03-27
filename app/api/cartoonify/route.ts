@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify({
         input: {
-          prompt: "Transform this into a friendly 1980s anime-style illustration inspired by Studio that rhymes with Whibli. Use soft pastel colors, hand-drawn textures, and gentle cel shading. Apply subtle linework and natural lighting with a warm, nostalgic glow. Emphasize expressive, kind-eyed characters, fluid poses, and detailed, whimsical backgrounds. The overall aesthetic should feel cozy, cinematic, and storybook-like — capturing the charm, warmth, and dreamlike atmosphere of classic Ghibli films from the 80s era.",
+          prompt: "Transform this into a friendly 1980s anime-style illustration inspired by Studio that rhymes with Whibli. Use soft watercolor pastel colors, hand-drawn textures, and gentle cel shading. Apply subtle linework and natural lighting with a warm, nostalgic glow. Emphasize expressive, kind-eyed characters, fluid poses, and detailed, whimsical backgrounds. The overall aesthetic should feel cozy, cinematic, and detailed watercolor storybook-like — capturing the charm, warmth, and dreamlike atmosphere of classic Ghibli films from the 80s era.",
           aspect_ratio: aspect_ratio || "1:1",
           image_prompt: start_image_url,
           image_prompt_strength: 0.96,

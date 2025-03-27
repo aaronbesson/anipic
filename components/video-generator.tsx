@@ -189,11 +189,8 @@ export function VideoGenerator({ onVideoGenerated, setShowPayment, showPayment }
   }
 
   return (
-    <div className="space-y-4">
-
-
+    <div className="space-y-4 flex flex-col gap-4">
       <div className="flex">
-
         <ImageUploader onImageUploaded={setImageUrl} isGenerating={isGenerating} />
       </div>
 
