@@ -22,7 +22,7 @@ export default function Home() {
       <Header />
       <div className="flex flex-col-reverse lg:flex-row lg:min-h-screen">
         {/* Left Column - Controls */}
-        <div className={`w-full border-t lg:border-t-0 lg:border-r border-gray-100 ${videoUrl ? "lg:w-1/2 max-h-screen overflow-y-auto" : "w-full"}`}>
+        <div className={`w-full border-t lg:border-t-0 lg:border-r border-gray-100 ${videoUrl ? "lg:w-1/2 max-h-screen overflow-y-auto" : "w-full lg:w-1/2 mx-auto"}`}>
           <div className="w-full mx-auto space-y-6 lg:space-y-8">
 
             {loading ? (
