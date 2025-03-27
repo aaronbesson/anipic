@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
 import { FerrisWheelIcon, SparkleIcon } from "lucide-react"
 import { useState } from "react"
+import { GoogleAuthButton } from "./google-auth-button"
 
 export default function Header() {
     const { user, userData, loading } = useAuth()
@@ -21,7 +22,7 @@ export default function Header() {
                 </div>
 
                 <div className="flex-1" />
-                <Dialog>
+                {user ? <Dialog>
                     <DialogTrigger asChild>
                         <Button
                             size="sm"
@@ -36,7 +37,7 @@ export default function Header() {
                     <DialogContent>
                         <StripePaymentForm />
                     </DialogContent>
-                </Dialog>
+                </Dialog> : <GoogleAuthButton />}
             </div>
         </div>
     )
