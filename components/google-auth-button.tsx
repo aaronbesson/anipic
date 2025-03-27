@@ -63,7 +63,7 @@ export function GoogleAuthButton() {
   }
 
   return (
-    <Button onClick={user ? handleSignOut : handleSignIn} disabled={isLoading} className="w-full">
+    <Button onClick={user ? handleSignOut : handleSignIn} disabled={isLoading} className="bg-black text-white border border-neutral-700 shadow-lg">
       {isLoading ? "Loading..." : user ? "Sign Out" : "Sign in with Google"}
     </Button>
   )

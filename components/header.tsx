@@ -4,7 +4,7 @@ import { useAuth } from "@/components/auth-provider"
 import { StripePaymentForm } from "@/components/stripe-payment-form"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
-import { SparkleIcon, VideoIcon } from "lucide-react"
+import { FerrisWheelIcon, SparkleIcon } from "lucide-react"
 import { useState } from "react"
 
 export default function Header() {
@@ -15,9 +15,9 @@ export default function Header() {
     return (
         <div className="w-full mx-auto space-y-6 lg:space-y-8 bg-white border-b border-gray-100 sticky top-0 z-50 p-2 shadow-sm">
             <div className="flex flex-row gap-4 items-center justify-between w-full max-w-7xl mx-auto">
-                <div className="">
-                    <h1 className="text-xl lg:text-2xl font-light tracking-tight">Studio Anim</h1>
-                    <p className="text-gray-500 text-xs">Transform your images into animated videos</p>
+                <div className="flex flex-row gap-2 items-center">
+                    <FerrisWheelIcon className="h-6 w-6" />
+                    <h1 className="text-xl lg:text-2xl font-bold tracking-tight">Studio Anim</h1>
                 </div>
 
                 <div className="flex-1" />
