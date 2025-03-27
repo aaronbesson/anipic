@@ -34,7 +34,6 @@ export function VideoPlayer({ videoUrl }: VideoPlayerProps) {
         autoPlay
         loop
         className="w-full h-auto"
-        style={{ maxHeight: "70vh" }}
       />
     </Card>
   )

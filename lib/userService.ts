@@ -24,13 +24,13 @@ export async function getOrCreateUser(user: User): Promise<UserData> {
   if (userSnap.exists()) {
     return userSnap.data() as UserData;
   } else {
-    // Create new user document
+    // Create new user document with 1 free credit
     const userData: UserData = {
       uid: user.uid,
       email: user.email || '',
       displayName: user.displayName || undefined,
       photoURL: user.photoURL || undefined,
-      credits: 0, // Start with 0 credits
+      credits: 1, // Give 1 free credit to new users
       createdAt: Date.now(),
       updatedAt: Date.now(),
     };

@@ -7,16 +7,18 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Loader2 } from "lucide-react"
+import { CreditCard, Loader2, SparkleIcon } from "lucide-react"
 import { ImageUploader } from "./image-uploader"
 import { useAuth } from "./auth-provider"
 import { useCredits } from "@/lib/userService"
 
 type VideoGeneratorProps = {
   onVideoGenerated: (videoUrl: string) => void
+  setShowPayment: (showPayment: boolean) => void
+  showPayment: boolean
 }
 
-export function VideoGenerator({ onVideoGenerated }: VideoGeneratorProps) {
+export function VideoGenerator({ onVideoGenerated, setShowPayment, showPayment }: VideoGeneratorProps) {
   const { user, userData, refreshUserData } = useAuth()
   const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [prompt, setPrompt] = useState("")
@@ -32,12 +34,12 @@ export function VideoGenerator({ onVideoGenerated }: VideoGeneratorProps) {
   // Poll for video status when we have a prediction ID
   useEffect(() => {
     if (!predictionId) return;
-    
+
     // Clear any existing interval
     if (pollingIntervalRef.current) {
       clearInterval(pollingIntervalRef.current);
     }
-    
+
     const checkStatus = async () => {
       try {
         const response = await fetch("/api/check-video-status", {
@@ -47,14 +49,14 @@ export function VideoGenerator({ onVideoGenerated }: VideoGeneratorProps) {
           },
           body: JSON.stringify({ predictionId }),
         });
-        
+
         if (!response.ok) {
           throw new Error("Failed to check video status");
         }
-        
+
         const data = await response.json();
         setStatus(data.status);
-        
+
         // If completed, stop polling and set video URL
         if (data.status === "succeeded") {
           if (pollingIntervalRef.current) {
@@ -63,7 +65,7 @@ export function VideoGenerator({ onVideoGenerated }: VideoGeneratorProps) {
           setIsGenerating(false);
           setPredictionId(null);
           onVideoGenerated(data.output);
-        } 
+        }
         // If failed, stop polling and show error
         else if (data.status === "failed" || data.status === "canceled") {
           if (pollingIntervalRef.current) {
@@ -77,13 +79,13 @@ export function VideoGenerator({ onVideoGenerated }: VideoGeneratorProps) {
         console.error("Error checking status:", error);
       }
     };
-    
+
     // Immediately check once
     checkStatus();
-    
+
     // Then set up polling every 3 seconds
     pollingIntervalRef.current = setInterval(checkStatus, 3000);
-    
+
     // Clean up interval on unmount
     return () => {
       if (pollingIntervalRef.current) {
@@ -116,14 +118,14 @@ export function VideoGenerator({ onVideoGenerated }: VideoGeneratorProps) {
       // Client-side credit deduction
       const { initializeFirebase } = await import("@/lib/firebase")
       const { db } = await initializeFirebase()
-      
+
       if (!db) {
         throw new Error("Firestore not initialized")
       }
-      
+
       const { doc, updateDoc, increment } = await import("firebase/firestore")
       const userRef = doc(db, "users", user.uid)
-      
+
       // Deduct 1 credit
       await updateDoc(userRef, {
         credits: increment(-1),
@@ -155,7 +157,7 @@ export function VideoGenerator({ onVideoGenerated }: VideoGeneratorProps) {
 
       const data = await response.json()
       setPredictionId(data.id)
-      
+
       // Refresh user data to update credit display
       await refreshUserData()
     } catch (error) {
@@ -167,7 +169,7 @@ export function VideoGenerator({ onVideoGenerated }: VideoGeneratorProps) {
 
   const getStatusMessage = () => {
     if (!status) return "Preparing...";
-    
+
     switch (status) {
       case "starting":
         return "Starting generation...";
@@ -187,93 +189,85 @@ export function VideoGenerator({ onVideoGenerated }: VideoGeneratorProps) {
   }
 
   return (
-    <Card className="w-full">
-      <CardContent className="pt-6 space-y-6">
-        <div className="flex justify-between items-center">
-          <h3 className="font-medium">Generate Video</h3>
-          <div className="text-sm">
-            Credits: <span className="font-semibold">{userData?.credits || 0}</span>
-          </div>
-        </div>
-        
+    <div className="space-y-4">
+      <div className="space-y-2">
+
+        <ImageUploader onImageUploaded={setImageUrl} isGenerating={isGenerating} />
+      </div>
+
+      <div className="space-y-2">
+        <Textarea
+          id="prompt"
+          placeholder="Add a prompt to describe the video you want to generate"
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+          className="resize-none"
+        />
+      </div>
+
+      <div className="grid grid-cols-3 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="image">Upload Image</Label>
-          <ImageUploader onImageUploaded={setImageUrl} isGenerating={isGenerating} />
+          <Label htmlFor="duration">Duration (seconds)</Label>
+          <Select value={duration} onValueChange={setDuration}>
+            <SelectTrigger id="duration">
+              <SelectValue placeholder="Select duration" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="5">5</SelectItem>
+              <SelectItem value="9">9</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="prompt">Prompt</Label>
-          <Textarea
-            id="prompt"
-            placeholder="A cinematic anime, group of developers, okay, thumbs up, smiles"
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            className="resize-none"
-          />
+          <Label htmlFor="aspect-ratio">Aspect Ratio</Label>
+          <Select value={aspectRatio} onValueChange={setAspectRatio}>
+            <SelectTrigger id="aspect-ratio">
+              <SelectValue placeholder="Select aspect ratio" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="9:16">9:16 (Portrait)</SelectItem>
+              <SelectItem value="16:9">16:9 (Landscape)</SelectItem>
+              <SelectItem value="1:1">1:1 (Square)</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
+        <div className="space-y-2">
+      <Label htmlFor="loop">Loop</Label>
+        <Select value={loop ? "true" : "false"} onValueChange={(value) => setLoop(value === "true")}>
+          <SelectTrigger id="loop">
+            <SelectValue placeholder="Select loop" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="true">True</SelectItem>
+            <SelectItem value="false">False</SelectItem>
+          </SelectContent>
+        </Select>
+  
+      </div>
+      </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="duration">Duration (seconds)</Label>
-            <Input
-              id="duration"
-              type="number"
-              min="1"
-              max="10"
-              value={duration}
-              onChange={(e) => setDuration(e.target.value)}
-              disabled={true}
-            />
-          </div>
+      
 
-          <div className="space-y-2">
-            <Label htmlFor="aspect-ratio">Aspect Ratio</Label>
-            <Select value={aspectRatio} onValueChange={setAspectRatio}>
-              <SelectTrigger id="aspect-ratio">
-                <SelectValue placeholder="Select aspect ratio" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="9:16">9:16 (Portrait)</SelectItem>
-                <SelectItem value="16:9">16:9 (Landscape)</SelectItem>
-                <SelectItem value="1:1">1:1 (Square)</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+      {error && <p className="text-sm text-red-500">{error}</p>}
 
-        <div className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            id="loop"
-            checked={loop}
-            onChange={(e) => setLoop(e.target.checked)}
-            className="h-4 w-4 rounded border-gray-300"
-          />
-          <Label htmlFor="loop" className="text-sm font-normal">
-            Loop video
-          </Label>
-        </div>
-
-        {error && <p className="text-sm text-red-500">{error}</p>}
-
-        <Button 
-          onClick={handleGenerate} 
-          disabled={isGenerating || !imageUrl || !prompt || !userData || userData.credits <= 0} 
-          className="w-full"
-        >
-          {isGenerating ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              {getStatusMessage()}
-            </>
-          ) : userData && userData.credits <= 0 ? (
-            "No Credits Available"
-          ) : (
-            "Generate Video (1 Credit)"
-          )}
-        </Button>
-      </CardContent>
-    </Card>
+      <Button
+        onClick={handleGenerate}
+        disabled={isGenerating || !imageUrl || !prompt || !userData || userData.credits <= 0}
+        className="w-full"
+      >
+        {isGenerating ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            {getStatusMessage()}
+          </>
+        ) : userData && userData.credits <= 0 ? (
+          "No Credits Available"
+        ) : (
+          "Generate Video (1 Credit)"
+        )}
+      </Button>
+    </div>
   )
 }
 

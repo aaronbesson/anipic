@@ -48,7 +48,7 @@ export function ImageUploader({ onImageUploaded, isGenerating }: ImageUploaderPr
 
       const { ref, uploadBytes, getDownloadURL } = await import("firebase/storage")
 
-      const storageRef = ref(storage, `images/${user.uid}/${Date.now()}_${file.name}`)
+      const storageRef = ref(storage, `images/${user.uid}/${file.name}`)
       const snapshot = await uploadBytes(storageRef, file)
       const downloadUrl = await getDownloadURL(snapshot.ref)
 
@@ -74,7 +74,7 @@ export function ImageUploader({ onImageUploaded, isGenerating }: ImageUploaderPr
 
       {previewUrl ? (
         <Card className="overflow-hidden relative">
-          <img src={previewUrl || "/placeholder.svg"} alt="Preview" className="w-full h-64 object-cover" />
+          <img src={previewUrl || "/placeholder.svg"} alt="Preview" className="w-full h-auto object-cover" />
           {isUploading && (
             <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
               <Loader2 className="h-8 w-8 text-white animate-spin" />
@@ -83,17 +83,17 @@ export function ImageUploader({ onImageUploaded, isGenerating }: ImageUploaderPr
         </Card>
       ) : (
         <Card
-          className="border-dashed border-2 h-64 flex items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors"
+          className="border-dashed border-2 h-80 flex items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors"
           onClick={triggerFileInput}
         >
           <div className="text-center p-4">
             <Upload className="h-10 w-10 text-gray-400 mx-auto mb-2" />
-            <p className="text-sm text-gray-500">Click to upload an image</p>
+            <p className="text-sm text-gray-500">Click here to upload an image</p>
           </div>
         </Card>
       )}
 
-      {!isGenerating && <Button onClick={triggerFileInput} disabled={isUploading} className="w-full">
+      {!isGenerating && previewUrl && <Button onClick={triggerFileInput} disabled={isUploading} className="w-full">
         {isUploading ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
