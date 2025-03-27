@@ -1,27 +1,24 @@
 "use client"
 
-import { useState } from "react"
 import { useAuth } from "@/components/auth-provider"
 import { GoogleAuthButton } from "@/components/google-auth-button"
+import Header from "@/components/header"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Toaster } from "@/components/ui/toaster"
 import { VideoGenerator } from "@/components/video-generator"
 import { VideoPlayer } from "@/components/video-player"
-import { StripePaymentForm } from "@/components/stripe-payment-form"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Loader2, CreditCard, GithubIcon, VideoIcon, Upload, Settings, SparkleIcon, SpaceIcon } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Toaster } from "@/components/ui/toaster"
-import Link from "next/link"
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
-import Header from "@/components/header"
+import { Loader2, VideoIcon } from "lucide-react"
+import { useState } from "react"
 export default function Home() {
   const { user, userData, loading } = useAuth()
   const [videoUrl, setVideoUrl] = useState<string | null>(null)
   const [showPayment, setShowPayment] = useState(false)
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="lg:min-h-screen bg-neutral-50">
       <Header />
-      <div className="flex flex-col-reverse lg:flex-row min-h-screen">
+      <div className="flex flex-col-reverse lg:flex-row lg:min-h-screen">
         {/* Left Column - Controls */}
         <div className={`w-full lg:w-1/2 border-t lg:border-t-0 lg:border-r border-gray-100 p-4 sm:p-6 lg:p-8  ${videoUrl ? "lg:w-1/2 max-h-screen overflow-y-auto" : "lg:w-full"}`}>
           <div className="max-w-xl mx-auto space-y-6 lg:space-y-8">
@@ -82,6 +79,8 @@ export default function Home() {
           )}
         </div>}
       </div>
+
+
       <Toaster /> 
     </main>
   )

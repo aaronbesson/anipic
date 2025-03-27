@@ -190,19 +190,19 @@ export function VideoGenerator({ onVideoGenerated, setShowPayment, showPayment }
 
   return (
     <div className="space-y-4 flex flex-col gap-4">
-      <div className="flex">
+      <div className="flex relative">
         <ImageUploader onImageUploaded={setImageUrl} isGenerating={isGenerating} />
-      </div>
+    
 
-      <div className="space-y-2">
-        <Textarea
+      </div>
+      <Textarea
           id="prompt"
           placeholder="Add a prompt to describe the video you want to generate"
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           className="resize-none"
         />
-      </div>
+
 
       <div className="grid grid-cols-3 gap-4">
         <div className="space-y-2">

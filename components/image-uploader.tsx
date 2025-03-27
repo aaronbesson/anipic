@@ -186,6 +186,9 @@ export function ImageUploader({ onImageUploaded, isGenerating }: ImageUploaderPr
               <PaintbrushIcon className="w-10 h-10 text-black" />
             )}
           </Button>
+          <Button variant="outline" size="icon" className="absolute top-14 right-2 z-10 rounded-full" onClick={() => setPreviewUrl(null)}>
+            <XIcon className="w-5 h-5" /> 
+          </Button>
           <img 
             src={cartoonifiedUrl || previewUrl || "/placeholder.svg"} 
             alt="Preview" 
@@ -216,17 +219,6 @@ export function ImageUploader({ onImageUploaded, isGenerating }: ImageUploaderPr
           </div>
         </Card>
       )}
-
-      {!isGenerating && previewUrl && <Button onClick={triggerFileInput} disabled={isUploading} className="w-full">
-        {isUploading ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Uploading...
-          </>
-        ) : (
-          "Upload Image"
-        )}
-      </Button>}
     </div>
   )
 }
