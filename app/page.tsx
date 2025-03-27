@@ -87,7 +87,7 @@ export default function Home() {
         )}
       </div>
       <Link href="https://github.com/aaronbesson/anipic" target="_blank"> 
-        <GithubIcon className="absolute bottom-4 right-4 w-8 h-8 bg-white rounded-full p-1 shadow-md border border-gray-200" />
+        <GithubIcon className="fixed bottom-4 right-4 w-8 h-8 bg-white rounded-full p-1 shadow-md border border-gray-200" />
       </Link>
       <Toaster /> 
     </main>
