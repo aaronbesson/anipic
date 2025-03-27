@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { CreditCard, Loader2, SparkleIcon } from "lucide-react"
+import { CreditCard, Loader2, SpaceIcon, SparkleIcon } from "lucide-react"
 import { ImageUploader } from "./image-uploader"
 import { useAuth } from "./auth-provider"
 import { useCredits } from "@/lib/userService"
@@ -190,7 +190,9 @@ export function VideoGenerator({ onVideoGenerated, setShowPayment, showPayment }
 
   return (
     <div className="space-y-4">
-      <div className="space-y-2">
+
+
+      <div className="flex">
 
         <ImageUploader onImageUploaded={setImageUrl} isGenerating={isGenerating} />
       </div>
@@ -233,21 +235,21 @@ export function VideoGenerator({ onVideoGenerated, setShowPayment, showPayment }
           </Select>
         </div>
         <div className="space-y-2">
-      <Label htmlFor="loop">Loop</Label>
-        <Select value={loop ? "true" : "false"} onValueChange={(value) => setLoop(value === "true")}>
-          <SelectTrigger id="loop">
-            <SelectValue placeholder="Select loop" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="true">True</SelectItem>
-            <SelectItem value="false">False</SelectItem>
-          </SelectContent>
-        </Select>
-  
-      </div>
+          <Label htmlFor="loop">Loop</Label>
+          <Select value={loop ? "true" : "false"} onValueChange={(value) => setLoop(value === "true")}>
+            <SelectTrigger id="loop">
+              <SelectValue placeholder="Select loop" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="true">True</SelectItem>
+              <SelectItem value="false">False</SelectItem>
+            </SelectContent>
+          </Select>
+
+        </div>
       </div>
 
-      
+
 
       {error && <p className="text-sm text-red-500">{error}</p>}
 

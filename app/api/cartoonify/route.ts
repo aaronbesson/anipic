@@ -18,11 +18,11 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify({
         input: {
-          prompt: prompt + " in the style of Studio Ghibli illustrations, with a cartoonish and stylized look",
-          aspect_ratio: aspect_ratio || "3:2",
+          prompt: "Transform this into a friendly 1980s anime-style illustration inspired by Studio that rhymes with Whibli. Use soft pastel colors, hand-drawn textures, and gentle cel shading. Apply subtle linework and natural lighting with a warm, nostalgic glow. Emphasize expressive, kind-eyed characters, fluid poses, and detailed, whimsical backgrounds. The overall aesthetic should feel cozy, cinematic, and storybook-like — capturing the charm, warmth, and dreamlike atmosphere of classic Ghibli films from the 80s era.",
+          aspect_ratio: aspect_ratio || "1:1",
           image_prompt: start_image_url,
-          image_prompt_strength: 0.9,
-          safety_tolerance: 3,
+          image_prompt_strength: 0.96,
+          safety_tolerance: 5,
           output_format: "jpg"
         },
       }),
@@ -35,7 +35,25 @@ export async function POST(req: NextRequest) {
     }
 
     const data = await response.json()
-    return NextResponse.json(data)
+    
+    // Poll for the final result
+    let prediction = data
+    while (prediction.status !== "succeeded" && prediction.status !== "failed") {
+      await new Promise(resolve => setTimeout(resolve, 1000)) // Wait 1 second between polls
+      const pollResponse = await fetch(prediction.urls.get, {
+        headers: {
+          Authorization: `Bearer ${process.env.REPLICATE_API_TOKEN}`,
+        },
+      })
+      prediction = await pollResponse.json()
+      console.log("Polling prediction status:", prediction.status)
+    }
+
+    if (prediction.status === "failed") {
+      return NextResponse.json({ error: prediction.error || "Failed to cartoonify image" }, { status: 500 })
+    }
+
+    return NextResponse.json(prediction)
   } catch (error) {
     console.error("Error cartoonifying image:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })

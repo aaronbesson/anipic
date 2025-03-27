@@ -6,7 +6,7 @@ import { useState, useRef, useEffect } from "react"
 import { useAuth } from "./auth-provider"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Loader2, Upload } from "lucide-react"
+import { Loader2, Paintbrush, Paintbrush2, PaintbrushIcon, SparkleIcon, Upload } from "lucide-react"
 
 type ImageUploaderProps = {
   onImageUploaded: (imageUrl: string) => void;
@@ -17,6 +17,8 @@ export function ImageUploader({ onImageUploaded, isGenerating }: ImageUploaderPr
   const { user } = useAuth()
   const [isUploading, setIsUploading] = useState(false)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [cartoonifiedUrl, setCartoonifiedUrl] = useState<string | null>(null)
+  const [isCartoonifying, setIsCartoonifying] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isClient, setIsClient] = useState(false)
 
@@ -60,6 +62,44 @@ export function ImageUploader({ onImageUploaded, isGenerating }: ImageUploaderPr
     }
   }
 
+  const handleCartoonify = async () => {
+    if (!previewUrl) return
+
+    try {
+      setIsCartoonifying(true)
+      const response = await fetch("/api/cartoonify", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          start_image_url: previewUrl,
+          aspect_ratio: "1:1",
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to cartoonify image")
+      }
+
+      const data = await response.json()
+      console.log("Cartoonify response:", data)
+
+      if (data.output) {
+        setCartoonifiedUrl(data.output)
+        setPreviewUrl(data.output)
+        onImageUploaded(data.output)
+      } else {
+        throw new Error("No output URL received from cartoonify API")
+      }
+    } catch (error) {
+      console.error("Error cartoonifying image:", error)
+    } finally {
+      setIsCartoonifying(false)
+    }
+  }
+
   const triggerFileInput = () => {
     fileInputRef.current?.click()
   }
@@ -67,15 +107,33 @@ export function ImageUploader({ onImageUploaded, isGenerating }: ImageUploaderPr
   if (!isClient || !user) {
     return null
   }
+  
 
   return (
     <div className="w-full space-y-4">
       <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
-
+    
       {previewUrl ? (
         <Card className="overflow-hidden relative">
-          <img src={previewUrl || "/placeholder.svg"} alt="Preview" className="w-full h-auto object-cover" />
-          {isUploading && (
+          <Button 
+            variant="outline" 
+            size="icon" 
+            className="absolute top-2 right-2 z-10 rounded-full"
+            onClick={handleCartoonify}
+            disabled={isCartoonifying}
+          >
+            {isCartoonifying ? (
+              <Loader2 className="w-10 h-10 text-black animate-spin" />
+            ) : (
+              <PaintbrushIcon className="w-10 h-10 text-black" />
+            )}
+          </Button>
+          <img 
+            src={cartoonifiedUrl || previewUrl || "/placeholder.svg"} 
+            alt="Preview" 
+            className="w-full h-auto object-cover" 
+          />
+          {(isUploading || isCartoonifying) && (
             <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
               <Loader2 className="h-8 w-8 text-white animate-spin" />
             </div>
