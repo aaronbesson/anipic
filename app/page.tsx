@@ -7,10 +7,11 @@ import { VideoGenerator } from "@/components/video-generator"
 import { VideoPlayer } from "@/components/video-player"
 import { StripePaymentForm } from "@/components/stripe-payment-form"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Loader2, CreditCard, GithubIcon } from "lucide-react"
+import { Loader2, CreditCard, GithubIcon, VideoIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Toaster } from "@/components/ui/toaster"
 import Link from "next/link"
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
 
 export default function Home() {
   const { user, userData, loading } = useAuth()
@@ -86,8 +87,24 @@ export default function Home() {
           </div>
         )}
       </div>
+
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="outline" size="icon" className="fixed top-4 right-4 rounded-full">
+              <VideoIcon className="w-5 h-5" />
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+          <div style={{position: "relative", width: "100%", height: "0px", paddingBottom: "73.469%"}}>
+            <iframe allow="fullscreen;autoplay" allowFullScreen height="100%" src="https://streamable.com/e/xnq9su?autoplay=1&muted=1" width="100%" style={{border: "none", width: "100%", height: "100%", position: "absolute", left: "0px", top: "0px", overflow: "hidden"}}></iframe>
+          </div>
+          </DialogContent>
+        </Dialog>
+
       <Link href="https://github.com/aaronbesson/anipic" target="_blank"> 
-        <GithubIcon className="fixed bottom-4 right-4 w-8 h-8 bg-white rounded-full p-1 shadow-md border border-gray-200" />
+      <Button size="icon" className="fixed bottom-4 right-4 rounded-full">
+        <GithubIcon className="w-6 h-6" />
+      </Button>
       </Link>
       <Toaster /> 
     </main>
