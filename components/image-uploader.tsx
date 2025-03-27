@@ -19,12 +19,70 @@ export function ImageUploader({ onImageUploaded, isGenerating }: ImageUploaderPr
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [cartoonifiedUrl, setCartoonifiedUrl] = useState<string | null>(null)
   const [isCartoonifying, setIsCartoonifying] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
     setIsClient(true)
   }, [])
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(true)
+  }
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+  }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+  }
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+
+    const file = e.dataTransfer.files?.[0]
+    if (!file || !user) return
+
+    try {
+      // Create preview
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setPreviewUrl(e.target?.result as string)
+      }
+      reader.readAsDataURL(file)
+
+      // Upload to Firebase
+      setIsUploading(true)
+
+      const { initializeFirebase } = await import("@/lib/firebase")
+      const { storage } = await initializeFirebase()
+
+      if (!storage) {
+        throw new Error("Storage not initialized")
+      }
+
+      const { ref, uploadBytes, getDownloadURL } = await import("firebase/storage")
+
+      const storageRef = ref(storage, `images/${user.uid}/${file.name}`)
+      const snapshot = await uploadBytes(storageRef, file)
+      const downloadUrl = await getDownloadURL(snapshot.ref)
+
+      onImageUploaded(downloadUrl)
+    } catch (error) {
+      console.error("Error uploading image:", error)
+    } finally {
+      setIsUploading(false)
+    }
+  }
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -141,12 +199,20 @@ export function ImageUploader({ onImageUploaded, isGenerating }: ImageUploaderPr
         </Card>
       ) : (
         <Card
-          className="border-dashed border-2 h-80 flex items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors"
+          className={`border-dashed border-2 h-80 flex items-center justify-center cursor-pointer transition-colors ${
+            isDragging ? 'border-primary bg-primary/5' : 'hover:bg-gray-50'
+          }`}
           onClick={triggerFileInput}
+          onDragEnter={handleDragEnter}
+          onDragLeave={handleDragLeave}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
         >
           <div className="text-center p-4">
             <Upload className="h-10 w-10 text-gray-400 mx-auto mb-2" />
-            <p className="text-sm text-gray-500">Click here to upload an image</p>
+            <p className="text-sm text-gray-500">
+              {isDragging ? 'Drop your image here' : 'Click here or drag and drop to upload an image'}
+            </p>
           </div>
         </Card>
       )}
