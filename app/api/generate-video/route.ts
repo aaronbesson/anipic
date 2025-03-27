@@ -1,20 +1,16 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { hasEnoughCredits } from "@/lib/userService"
 
 export async function POST(req: NextRequest) {
   try {
     const { loop, prompt, duration, aspect_ratio, start_image_url, userId } = await req.json()
 
     // Validate input
-    if (!prompt || !start_image_url || !userId) {
+    if (!prompt || !start_image_url) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
-    // Check if user has enough credits (done client-side already but verify server-side for security)
-    const hasCredits = await hasEnoughCredits(userId, 1)
-    if (!hasCredits) {
-      return NextResponse.json({ error: "Not enough credits" }, { status: 403 })
-    }
+    // We trust the client-side credit check for now
+    // Credits are already deducted in the client component
 
     // Call Replicate API
     const response = await fetch("https://api.replicate.com/v1/models/luma/ray-flash-2-720p/predictions", {

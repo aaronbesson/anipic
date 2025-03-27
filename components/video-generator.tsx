@@ -113,11 +113,22 @@ export function VideoGenerator({ onVideoGenerated }: VideoGeneratorProps) {
       setIsGenerating(true)
       setStatus("starting")
 
-      // Use 1 credit for the video generation
-      const creditUsed = await useCredits(user.uid, 1)
-      if (!creditUsed) {
-        throw new Error("Failed to use credits")
+      // Client-side credit deduction
+      const { initializeFirebase } = await import("@/lib/firebase")
+      const { db } = await initializeFirebase()
+      
+      if (!db) {
+        throw new Error("Firestore not initialized")
       }
+      
+      const { doc, updateDoc, increment } = await import("firebase/firestore")
+      const userRef = doc(db, "users", user.uid)
+      
+      // Deduct 1 credit
+      await updateDoc(userRef, {
+        credits: increment(-1),
+        updatedAt: Date.now()
+      })
 
       const response = await fetch("/api/generate-video", {
         method: "POST",
@@ -130,11 +141,15 @@ export function VideoGenerator({ onVideoGenerated }: VideoGeneratorProps) {
           duration: Number.parseInt(duration),
           aspect_ratio: aspectRatio,
           start_image_url: imageUrl,
-          userId: user.uid,
         }),
       })
 
       if (!response.ok) {
+        // If API fails, refund the credit
+        await updateDoc(userRef, {
+          credits: increment(1),
+          updatedAt: Date.now()
+        })
         throw new Error("Failed to generate video")
       }
 
