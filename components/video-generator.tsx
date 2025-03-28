@@ -1,17 +1,14 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { CreditCard, Loader2, SpaceIcon, SparkleIcon } from "lucide-react"
-import { ImageUploader } from "./image-uploader"
+import { Textarea } from "@/components/ui/textarea"
+import { Loader2 } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
 import { useAuth } from "./auth-provider"
-import { useCredits } from "@/lib/userService"
-
+import { ImageUploader } from "./image-uploader"
+import { useToast } from "@/hooks/use-toast"
 type VideoGeneratorProps = {
   onVideoGenerated: (videoUrl: string) => void
   setShowPayment: (showPayment: boolean) => void
@@ -30,6 +27,8 @@ export function VideoGenerator({ onVideoGenerated, setShowPayment, showPayment }
   const [status, setStatus] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null)
+  const { toast } = useToast()
+
 
   // Poll for video status when we have a prediction ID
   useEffect(() => {
@@ -157,7 +156,11 @@ export function VideoGenerator({ onVideoGenerated, setShowPayment, showPayment }
 
       const data = await response.json()
       setPredictionId(data.id)
-
+      toast({
+        title: "Generate Video",
+        description: "Add a prompt to describe the video you want to generate",
+        duration: 5000,
+      })
       // Refresh user data to update credit display
       await refreshUserData()
     } catch (error) {

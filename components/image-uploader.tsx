@@ -2,12 +2,13 @@
 
 import type React from "react"
 
-import { useState, useRef, useEffect } from "react"
-import { useAuth } from "./auth-provider"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Loader2, Paintbrush, Paintbrush2, PaintbrushIcon, SparkleIcon, Upload, VideoIcon, XIcon } from "lucide-react"
-
+import { useToast } from "@/hooks/use-toast"
+import { Loader2, PaintbrushIcon, Upload, XIcon } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
+import { useAuth } from "./auth-provider"
+  
 type ImageUploaderProps = {
   onImageUploaded: (imageUrl: string) => void;
   isGenerating: boolean;
@@ -22,7 +23,7 @@ export function ImageUploader({ onImageUploaded, isGenerating }: ImageUploaderPr
   const [isDragging, setIsDragging] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isClient, setIsClient] = useState(false)
-
+  const { toast } = useToast()
   useEffect(() => {
     setIsClient(true)
   }, [])
@@ -111,7 +112,11 @@ export function ImageUploader({ onImageUploaded, isGenerating }: ImageUploaderPr
       const storageRef = ref(storage, `images/${user.uid}/${file.name}`)
       const snapshot = await uploadBytes(storageRef, file)
       const downloadUrl = await getDownloadURL(snapshot.ref)
-
+      toast({
+        title: "Studio Anim Tip",
+        description: "Use the paintbrush icon to apply a cartoon style to your image.",
+        duration: 5000,
+      })
       onImageUploaded(downloadUrl)
     } catch (error) {
       console.error("Error uploading image:", error)

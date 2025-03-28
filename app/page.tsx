@@ -4,18 +4,19 @@ import { useAuth } from "@/components/auth-provider"
 import { GoogleAuthButton } from "@/components/google-auth-button"
 import Header from "@/components/header"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Toaster } from "@/components/ui/toaster"
+import { useToast } from "@/hooks/use-toast"
 import { VideoGenerator } from "@/components/video-generator"
 import { VideoPlayer } from "@/components/video-player"
-import { ArrowRight, Instagram, Linkedin, Loader2, Play, Twitter, VideoIcon, Youtube } from "lucide-react"
-import Image from "next/image"
+import { ArrowRight, Loader2, VideoIcon } from "lucide-react"
 import Link from "next/link"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 export default function Home() {
   const { user, userData, loading } = useAuth()
   const [videoUrl, setVideoUrl] = useState<string | null>(null)
   const [showPayment, setShowPayment] = useState(false)
+  const { toast } = useToast()
+  // if user show toast
+
 
   return user ? (
     <main className="lg:min-h-screen bg-neutral-100">
@@ -71,9 +72,6 @@ export default function Home() {
           )}
         </div>}
       </div>
-
-
-      <Toaster />
     </main>
   ) : (
     <div className="min-h-screen bg-neutral-100">
