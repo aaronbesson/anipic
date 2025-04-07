@@ -144,18 +144,6 @@ export default function Home() {
                 </svg>
                 <span>Advanced animation effects</span>
               </li>
-              <li className="flex items-start">
-                <svg
-                  className="w-5 h-5 text-green-500 mr-2 mt-0.5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-                <span>Cartoonify Image</span>
-              </li>
             </ul>
 
             <GoogleAuthButton />

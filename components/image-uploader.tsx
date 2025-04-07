@@ -178,19 +178,6 @@ export function ImageUploader({ onImageUploaded, isGenerating }: ImageUploaderPr
     
       {previewUrl ? (
         <Card className="overflow-hidden relative">
-          <Button 
-            variant="outline" 
-            size="icon" 
-            className="absolute top-2 right-2 z-10 rounded-full"
-            onClick={handleCartoonify}
-            disabled={isCartoonifying}
-          >
-            {isCartoonifying ? (
-              <Loader2 className="w-10 h-10 text-black animate-spin" />
-            ) : (
-              <PaintbrushIcon className="w-10 h-10 text-black" />
-            )}
-          </Button>
           <Button variant="outline" size="icon" className="absolute top-14 right-2 z-10 rounded-full" onClick={() => setPreviewUrl(null)}>
             <XIcon className="w-5 h-5" /> 
           </Button>

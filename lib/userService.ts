@@ -30,7 +30,7 @@ export async function getOrCreateUser(user: User, db?: Firestore): Promise<UserD
       email: user.email || '',
       displayName: user.displayName || undefined,
       photoURL: user.photoURL || undefined,
-      credits: 1, // Give 1 free credit to new users
+      credits: 0, // Give 0 free credit to new users
       createdAt: Date.now(),
       updatedAt: Date.now(),
     };
